@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>TacoBell</title>
+</head>
+<body>
+    <script src="script.js"></script>
+    <script>
+        let url = localStorage.getItem('url') || 'en';     
+        let lingua = localStorage.getItem('lingua') || 'en';
+        let indice = localStorage.getItem('indice') || 0;
+        const url_en = "https://mocki.io/v1/2f864ea0-d8b9-490b-8056-90dba37d41d3";    
+        const url_it = "https://mocki.io/v1/79f87e5d-b34a-4dba-b64b-32ad4ce919f7";
+    </script>
+    <div class="container-body">
+        <div class="button-change">
+            <button id="changeIT">IT</button>
+            <button id="changeEN">EN</button>  
+        </div>
+        <script>
+            const buttonEN = document.getElementById("changeEN");
+            const buttonIT = document.getElementById("changeIT");
+
+            buttonEN.addEventListener("click", () =>{
+                localStorage.setItem('url', url_en);  // Salva la lingua selezionata
+                localStorage.setItem('lingua', 0);  // Salva la lingua selezionata
+                location.reload(); // Ricarica la pagina per applicare la nuova lingua
+            });
+            buttonIT.addEventListener("click", () =>{
+                localStorage.setItem('url', url_it);  // Salva la lingua selezionata
+                localStorage.setItem('lingua', 1);  // Salva la lingua selezionata
+                location.reload(); // Ricarica la pagina per applicare la nuova lingua
+            });
+
+            
+        </script>
+        <div class="container-title">
+            <span id="title">
+                <script>
+                    const tit = document.getElementById("title");
+                    lingua == 0 ? tit.innerHTML = "Build Your Taco" : tit.innerHTML = "Costruisci il tuo Taco"
+                </script>
+            </span>
+        </div>
+        <div class="container-info">
+            <div class="protein">
+                <div class="protein-top">
+                    <div class="img">
+                        <img src="uova-Photoroom.png"></img>
+                    </div>
+                    <span id="p">
+                        <script>
+                            const p = document.getElementById("p");
+                            lingua == 0 ? p.innerHTML = "Protein" : p.innerHTML = "Proteine"
+                        </script>
+                    </span>
+                </div>
+                <div class="protein-bottom">
+                    <form>
+                        <select id="proteinSelect">
+                            <script>
+                                fetch(url)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        const selectElement = document.getElementById('proteinSelect'); 
+
+                                        data.proteins.forEach((protein, index) => {
+                                            const option = document.createElement('option');
+                                            option.value = `${protein.name} (${protein.preparation})`;
+                                            option.textContent = `${protein.name} (${protein.preparation})`;
+                                            selectElement.appendChild(option);
+                                        });
+                                    })
+                                    .catch(error => console.log("Error:", error));
+                            </script>
+                        </select>
+                    </form>
+                </div>
+            </div>
+            <div class="salsa">
+                <div class="salsa-top">
+                    <div class="img">
+                        <img src="fuoco-Photoroom.png"></img>
+                    </div>
+                    <span id="s">
+                        <script>
+                            const s = document.getElementById("s");
+                            lingua == 0 ? s.innerHTML = "Salsas" : s.innerHTML = "Salse"
+                        </script>
+                    </span>
+                </div>
+                <div class="salsa-bottom">
+                    <form>
+                        <select id="salsaSelect">
+                            <script>
+                                fetch(url)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        const selectElement = document.getElementById('salsaSelect'); 
+                                        if(lingua == 0){
+                                            data.salsas.forEach((salsa, index) => {
+                                                const option = document.createElement('option');
+                                                option.value = `${salsa.name} (${salsa.spiciness})`;
+                                                option.textContent = `${salsa.name} (${salsa.spiciness})`;
+                                                selectElement.appendChild(option);
+                                            })
+                                        } else {
+                                            data.proteins[0].salsas.forEach((salsa) => {
+                                                const option = document.createElement('option');
+                                                option.value = `${salsa.name} (${salsa.spiciness})`;
+                                                option.textContent = `${salsa.name} (${salsa.spiciness})`;
+                                                selectElement.appendChild(option);
+                                            });
+                                            document.getElementById("proteinSelect").addEventListener("change", function() {
+                                                let inf = document.getElementById("proteinSelect");
+                                                let x = inf.value;  
+                                                localStorage.setItem('x', x);
+
+                                                //console.log("inf.value:", inf.value);  // Verifica il valore corrente di inf
+                                                //console.log("x salvato in localStorage:", x);  // Verifica il valore di x
+                                                data.proteins.forEach((protein, index) => {
+                                                    let proteinString = `${protein.name} (${protein.preparation})`;
+                                                    if (proteinString === x) {
+                                                        localStorage.setItem('indice', index);  // Memorizza l'indice
+                                                        //console.log("Indice aggiornato:", index);  // Verifica l'indice
+                                                    }
+                                                });
+                                                let indice = localStorage.getItem('indice');
+                                                console.log("Indice da localStorage:", indice);  // Verifica il valore di indice
+
+                                                // Ora aggiungi le salse della proteina selezionata
+                                                const selectElement = document.getElementById('salsaSelect');
+                                                selectElement.innerHTML = ''; 
+                                                data.proteins[indice].salsas.forEach((salsa) => {
+                                                    const option = document.createElement('option');
+                                                    option.value = `${salsa.name} (${salsa.spiciness})`;
+                                                    option.textContent = `${salsa.name} (${salsa.spiciness})`;
+                                                    selectElement.appendChild(option);
+                                                });
+                                            })
+                                        }
+                                    })
+                                    .catch(error => console.log("Error:", error));
+                            </script>
+                        </select>
+                    </form>
+                </div>
+            </div>
+            <div class="container-topping">
+                <span id="span-toppings">
+                    <script>
+                        const t = document.getElementById("span-toppings");
+                        lingua == 0 ? t.innerHTML = "Toppings" : t.innerHTML = "Condimenti"
+                    </script>
+                </span>
+                <ul id="lista">
+                    <script>
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(data => {
+                                const selectElement = document.getElementById('lista'); 
+                                selectElement.style.listStyleType = 'none';
+                                selectElement.style.padding = '0';
+                                if(lingua == 0){
+                                    data.toppings.forEach((topping, index) => {
+                                        const li = document.createElement('li');
+                                    
+                                        const checkbox = document.createElement('input');
+                                        checkbox.type = "checkbox";
+                                        checkbox.value = `${topping.name} (${topping.quantity})`; 
+                                        
+                                        const label = document.createElement('label');
+                                        label.setAttribute('for', checkbox.id);  
+                                        label.textContent = `${topping.name} (${topping.quantity})`;
+                        
+                                        li.appendChild(checkbox);
+                                        li.appendChild(label);
+                                        selectElement.appendChild(li);
+                                    });
+                                } else {
+                                    let x = localStorage.getItem('x'); // Ottieni la proteina selezionata da localStorage
+                                    const inf = document.getElementById("proteinSelect");
+                                    
+                                    data.proteins.forEach((protein, index) => {
+                                        let proteinString = `${protein.name} (${protein.preparation})`;
+                                        if (proteinString === x) {
+                                            localStorage.setItem('indice', index); 
+                                        }
+                                    });
+
+                                    let indice = localStorage.getItem('indice'); // Ottieni l'indice della proteina selezionata
+                                    selectElement.innerHTML = '';
+                                    
+                                    data.proteins[indice].toppings.forEach((topping) => {
+                                        const li = document.createElement('li');
+                                        
+                                        const checkbox = document.createElement('input');
+                                        checkbox.type = "checkbox";
+                                        checkbox.value = `${topping.name} (${topping.quantity})`; 
+                                        
+                                        const label = document.createElement('label');
+                                        label.setAttribute('for', checkbox.id);  
+                                        label.textContent = `${topping.name} (${topping.quantity})`;
+
+                                        li.appendChild(checkbox);
+                                        li.appendChild(label);
+                                        selectElement.appendChild(li);
+                                    });
+
+                                    document.getElementById("proteinSelect").addEventListener("change", function() {
+                                        let inf = document.getElementById("proteinSelect");
+                                        let x = inf.value;  // Memorizza la nuova proteina selezionata
+                                        localStorage.setItem('x', x);  
+                                        
+                                        data.proteins.forEach((protein, index) => {
+                                            let proteinString = `${protein.name} (${protein.preparation})`;
+                                            if (proteinString === x) {
+                                                localStorage.setItem('indice', index); // Memorizza l'indice
+                                            }
+                                        });
+
+                                        let indice = localStorage.getItem('indice');
+                                        selectElement.innerHTML = '';
+                                        
+                                        data.proteins[indice].toppings.forEach((topping) => {
+                                            const li = document.createElement('li');
+                                            
+                                            const checkbox = document.createElement('input');
+                                            checkbox.type = "checkbox";
+                                            checkbox.value = `${topping.name} (${topping.quantity})`; 
+                                            
+                                            const label = document.createElement('label');
+                                            label.setAttribute('for', checkbox.id);  
+                                            label.textContent = `${topping.name} (${topping.quantity})`;
+
+                                            li.appendChild(checkbox);
+                                            li.appendChild(label);
+                                            selectElement.appendChild(li);
+                                        });
+                                    });
+                                }
+                            })
+                            .catch(error => console.log("Error:", error));
+                    </script>
+                </ul>
+            </div>
+            <div class="conatiner-button-build-taco">
+                <button id="build-taco">
+                    <script>
+                        const b = document.getElementById("build-taco");
+                        lingua == 0 ? b.innerHTML = "Build Taco" : b.innerHTML = "Costruisci Taco"
+                    </script>
+                </button>
+            </div>
+            <script>
+                const button = document.getElementById("build-taco");
+            </script>
+            <div class="container-recap">
+                <span id="your-taco">
+                    <script>
+                        const y = document.getElementById("your-taco");
+                        lingua == 0 ? y.innerHTML = "Your Taco" : y.innerHTML = "Il tuo Taco"
+                    </script>
+                </span>
+                <div class="recap">
+                    <div class="yt-top">
+                        <div class="img">
+                            <img src="uova-Photoroom.png"></img>
+                        </div>
+                        <span id="pro">
+                            <script>
+                                const pro = document.getElementById("pro");
+                                lingua == 0 ? pro.innerHTML = "Protein: " : pro.innerHTML = "Proteine: "
+                            </script>
+                        </span>
+                        <span id="info-protein"></span>
+                        <script>
+                            button.addEventListener("click", () => {       
+                                const span = document.getElementById("info-protein");
+                                const info = document.getElementById("proteinSelect");
+                                span.innerHTML = info.value;
+                            });
+                        </script>
+                    </div>
+                    <div class="yt-mid">
+                        <div class="img">
+                            <img src="fuoco-Photoroom.png"></img>
+                        </div>
+                        <span id="sal">
+                            <script>
+                                const sal = document.getElementById("sal");
+                                lingua == 0 ? sal.innerHTML = "Salsas: " : sal.innerHTML = "Salse: "
+                            </script>
+                        </span>
+                        <span id="info-salsas"></span>
+                        <script>
+                            button.addEventListener("click", () => {       
+                                const span = document.getElementById("info-salsas");
+                                const info = document.getElementById("salsaSelect");
+                                span.innerHTML = info.value;
+                            });
+                        </script>
+                    </div>
+                    <div class="yt-bottom">
+                        <span id="topp">
+                            <script>
+                                const topp = document.getElementById("topp");
+                                lingua == 0 ? topp.innerHTML = "Toppings: " : topp.innerHTML = "Condimenti: "
+                            </script>
+                        </span>
+                        <span id="info-toppings"></span>
+                        <script>
+                            button.addEventListener("click", () => {       
+                                const span = document.getElementById("info-toppings");
+                                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                                const selectedToppings = [];
+
+                                checkboxes.forEach(checkbox => {
+                                    if (checkbox.checked) {
+                                        selectedToppings.push(checkbox.value);
+                                    }
+                                });
+
+                                document.getElementById('info-toppings').textContent = selectedToppings.join(', ');
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
